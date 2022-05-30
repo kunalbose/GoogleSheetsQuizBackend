@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const Quiz = require("./models/Quiz");
 const cors = require("cors");
+const sheetScheduler = require("./sheetScheduler/sheetCronJob");
 const PORT = process.env.PORT || 3800;
 
 app.use(cors({ origin: true }));
@@ -24,9 +25,13 @@ function correctOptSearch(arr, l, r, x){
     }
 }
 
+sheetScheduler();
 
+app.get("/", (req, res)=>{
+    res.send("Hello from backend server");
+})
 
-app.get("/", async (req, res)=>{
+app.get("/storeSheetData", async (req, res)=>{
     const auth = new google.auth.GoogleAuth({
         keyFile: "credentials.json",
         scopes: "https://www.googleapis.com/auth/spreadsheets",
@@ -71,10 +76,9 @@ app.get("/", async (req, res)=>{
                 console.log("success", docs);
             }
         })
-
     }
 
-    res.send(getRows.data.values[1]);
+    res.send(getRows.data.values);
 })
 
 app.get("/user/fetchAllQuiz", async (req, res)=>{
